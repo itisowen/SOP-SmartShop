@@ -120,6 +120,14 @@ public class SmartShopApplication {
 		return new ResponseEntity<Book>(book, HttpStatus.OK);
 	}
 
+	Publisher pb = Publisher.getInstance();
+	@RequestMapping(value = "set/{name}/{phone}", method = RequestMethod.GET)
+	public Publisher setPb(@PathVariable String name, String phone){
+		pb.setName(name);
+		pb.setPhone(phone);
+		return pb;
+	}
+
 	public List<Book> Read(){
 		try {
 			FileInputStream fis = new FileInputStream("check.txt");
