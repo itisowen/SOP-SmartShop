@@ -122,7 +122,7 @@ public class SmartShopApplication {
 
 	Publisher pb = Publisher.getInstance();
 	@RequestMapping(value = "set/{name}/{phone}", method = RequestMethod.GET)
-	public Publisher setPb(@PathVariable String name, String phone){
+	public Publisher setPb(@PathVariable String name, @PathVariable String phone){
 		pb.setName(name);
 		pb.setPhone(phone);
 		return pb;
