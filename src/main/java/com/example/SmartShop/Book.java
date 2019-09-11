@@ -1,14 +1,14 @@
 package com.example.SmartShop;
 
-public class Book {
-    private int id;
+import java.io.*;
+
+public class Book implements Serializable {
     private String name;
     private String type;
     private String description;
-    private int price;
+    private double price;
 
-    public Book(int id, String name, String type, String description, int price) {
-        this.id = id;
+    public Book(String name, String type, String description, double price) {
         this.name = name;
         this.type = type;
         this.description = description;
@@ -17,23 +17,6 @@ public class Book {
 
     public Book() {
 
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -59,28 +42,37 @@ public class Book {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
 }
 
 class manga extends Book{
-    public manga(int id, String name, String type, String description, int price){
-        super(id, name, type, description, price);
+    public manga(String name, String type, String description, double price){
+        super(name, type, description, price);
     }
 }
 
 class history extends Book{
-    public history(int id, String name, String type, String description, int price){
-        super(id, name, type, description, price);
+    public history(String name, String type, String description, double price){
+        super(name, type, description, price);
     }
 }
 
 class fiction extends Book{
-    public fiction(int id, String name, String type, String description, int price){
-        super(id, name, type, description, price);
+    public fiction(String name, String type, String description, double price){
+        super(name, type, description, price);
     }
 }
 
 class novel extends Book{
-    public novel(int id, String name, String type, String description, int price){
-        super(id, name, type, description, price);
+    public novel(String name, String type, String description, double price){
+        super(name, type, description, price);
     }
 }

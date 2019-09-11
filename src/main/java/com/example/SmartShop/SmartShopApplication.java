@@ -2,84 +2,156 @@ package com.example.SmartShop;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @SpringBootApplication
 @RestController
 public class SmartShopApplication {
-	private static List<Book> allBooks = new ArrayList<Book>();
-	static {
-		allBooks.add(BooksFactory.createBook(1, "OnePiece", "manga", "สนุกมากกก ยังไม่จบ", 65));
-		allBooks.add(BooksFactory.createBook(2, "Naruto", "manga", "สนุกก แต่จบไปแล้ว", 65));
-		allBooks.add(BooksFactory.createBook(3, "หนูน้อยหมวกแดง", "fiction", "อ่านเมื่อนานมากกๆแล้วว", 50));
+	private static List<Book> listBooks = new ArrayList<Book>();
+	{
+		File file = new File("check.txt");
+		if (file.exists()){
+			System.out.println("TO0T0O");
+			listBooks = Read();
+		}
+		else{
+			listBooks.add(BooksFactory.createBook("One Piece", "การ์ตูน", "สนุกมากกก ยังไม่จบ", 65));
+			listBooks.add(BooksFactory.createBook("Naruto", "การ์ตูน", "สนุกก จบไปแล้ว", 65));
+			listBooks.add(BooksFactory.createBook("หนูน้อยหมวกแดง", "นิทาน", "อ่านเมื่อนานมากกๆแล้วว", 50));
+			Write();
+		}
 	}
 
-	@RequestMapping("/")
-	String home(){
-		return "TEST";
-	}
 	public static void main(String[] args) {
 		SpringApplication.run(SmartShopApplication.class, args);
 	}
 
-	@RequestMapping("/books")
-	public List<Book> getAllBooks(){
-		return this.allBooks;
-//				new Book(1, "One Piece", "การ์ตูน", "สนุกมากกก ยังไม่จบ", 65),
-//				new Book(2, "Naruto", "การ์ตูน", "สนุกก จบไปแล้ว", 65),
-//				new Book(3, "หนูน้อยหมวกแดง", "นิทาน", "อ่านเมื่อนานมากกๆแล้วว", 50)
+	@RequestMapping(value = "getall")
+	public List<Book> getall() {
+		return listBooks;
 	}
 
-	@RequestMapping("/searchname/{name}")
-	public List<Book> getName(@PathVariable String name){
-		List<Book> sh = new ArrayList<Book>();
-		for (Book list: getAllBooks()){
-			if (list.getName().toLowerCase().equals(name)){
-				sh.add(list);
+	@RequestMapping(value = "/get/{id}")
+	public ResponseEntity<Book> getType(@PathVariable int id) {
+		int count = 0;
+		for (Book i : listBooks) {
+			count += 1;
+			if (id == count) {
+				return new ResponseEntity<Book>(i, HttpStatus.OK);
 			}
 		}
-		return sh;
+		return null;
 
 	}
 
-	@RequestMapping("/searchtype/{type}")
-	public List<Book> getType(@PathVariable String type){
-		List<Book> sh = new ArrayList<Book>();
-		for (Book list: getAllBooks()){
-			if (list.getType().toLowerCase().equals(type)){
-				sh.add(list);
+	@RequestMapping(value = "/searchtype/{type}")
+	public List<Book> getType(@PathVariable String type) {
+		List<Book> listType = new ArrayList<Book>();
+		for (Book i : listBooks) {
+			if (i.getType().toLowerCase().equals(type)) {
+				listType.add(i);
 			}
 		}
-		return sh;
+		return listType;
 
 	}
 
-	@PostMapping("/addbook")
-	public List<Book> newBook(@RequestParam(value = "name", defaultValue = "name") String name,
-							  @RequestParam(value = "type", defaultValue = "type") String type,
-							  @RequestParam(value = "description", defaultValue = "description") String description,
-							  @RequestParam(value = "price", defaultValue = "0") int price
-	){
-		int id = this.allBooks.size();
-		id++;
-		String typeBook = "manga";
-		if (type.equals("manga")){
-			typeBook = "manga";
-		}else if (type.equals("history")){
-			typeBook = "history";
-		}else if (type.equals("fiction")){
-			typeBook = "fiction";
-		}else {
-			typeBook = "novel";
+//	@RequestMapping(value = "/get")
+//	public ResponseEntity<List<Book>> get() {
+//		Book book = new Book();
+//		book.setName("Naruto");
+//		book.setType("novel");
+//		book.setDescription("love fight");
+//		book.setPrice(60);
+//		this.listBooks.add(book);
+//		return new ResponseEntity<List<Book>>(this.listBooks, HttpStatus.OK);
+//	}
+
+	@RequestMapping(value = "/add", method = RequestMethod.POST)
+	public ResponseEntity<List<Book>> create(@RequestBody Book book) {
+		String name = book.getName();
+		String type = book.getType();
+		String description = book.getDescription();
+		double price = book.getPrice();
+		this.listBooks.add(new Book(name, type, description, price));
+
+		Write();
+		return new ResponseEntity<List<Book>>(this.listBooks, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/delete/{id}", method = RequestMethod.DELETE)
+	public ResponseEntity<List<Book>> delete(@PathVariable int id) {
+		int count = 0;
+		for (Book i : this.listBooks) {
+			count += 1;
+			if (id == count) {
+				this.listBooks.remove(i);
+				break;
+			}
 		}
-		this.allBooks.add(BooksFactory.createBook(id, name, type, description, price));
-		return this.allBooks;
+		Write();
+		return new ResponseEntity<List<Book>>(this.listBooks, HttpStatus.OK);
 	}
 
+	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
+	public ResponseEntity<Book> update(@PathVariable int id, @RequestBody Book book) {
+		String name = book.getName();
+		String type = book.getType();
+		String description = book.getDescription();
+		double price = book.getPrice();
+		int count = 0;
+		for (Book i : this.listBooks) {
+			count += 1;
+			if (id == count) {
+				i.setName(name);
+				i.setType(type);
+				i.setDescription(description);
+				i.setPrice(price);
+				return new ResponseEntity<Book>(i, HttpStatus.OK);
+			}
+		}
+		return new ResponseEntity<Book>(book, HttpStatus.OK);
+	}
 
+	public List<Book> Read(){
+		try {
+			FileInputStream fis = new FileInputStream("check.txt");
+			ObjectInputStream ois = new ObjectInputStream(fis);
+			List<Book> lstbook = (List<Book>) ois.readObject();
+			ois.close();
+			return lstbook;
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void Write(){
+
+		try {
+			FileOutputStream fos = new FileOutputStream("check.txt");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(this.listBooks);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
+
+
